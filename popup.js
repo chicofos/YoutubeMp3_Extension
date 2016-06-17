@@ -1,4 +1,5 @@
-var serverUrl = "http://192.168.1.65:3000/Datos";
+
+var serverUrl = "http://192.168.1.85:3000/Datos";
 
 function getCurrentTabUrl(callback) {
   var queryInfo = {
@@ -9,14 +10,14 @@ function getCurrentTabUrl(callback) {
   chrome.tabs.query(queryInfo, function(tabs) {
     var tab = tabs[0];
     var url = tab.url;
-
+    
     console.assert(typeof url === 'string', 'tab.url should be a string');
-    callback(url);
+    callback(url, tab.title);
   });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  getCurrentTabUrl(function(url){
+  getCurrentTabUrl(function(url, title){
       if(url.indexOf("www.youtube.com") === -1){
         alert('This is not youtube genius.');
         window.close();
@@ -39,25 +40,26 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.appendChild(anchor);
         anchor.style = "display: none";
 
-        saveData(anchor, xhr.response);
+        saveData(anchor, xhr.response, title);
       };
 
       xhr.onerror = function() {
         alert('Woops, there was an error making the request.');
+        window.close();
       };
   });
 });
 
 
-var saveData = function (anchor, data) {
+var saveData = function (anchor, data, title) {
   
   var blob = new Blob([data], {type: "audio/mpeg"}),
   url = window.URL.createObjectURL(blob);
 
-  var filename = url.substring(url.lastIndexOf("/") + 1).split("?")[0];
+  //var filename = url.substring(url.lastIndexOf("/") + 1).split("?")[0];
   
   anchor.href = url;
-  anchor.download = filename;
+  anchor.download = title + ".mp3";
   anchor.click();
   window.URL.revokeObjectURL(url);
 
